@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
+        id="cordova-plugin-http"
+        version="0.0.1">
+    <name>CDVHTTPClient</name>
+
+    <js-module name="CDVHTTPClient" src="www/CDVHTTPClient.js">
+        <clobbers target="CDVHTTPClient" />
+    </js-module>
+
+    <platform name="ios">
+        <config-file target="config.xml" parent="/*">
+            <feature name="CDVHTTPClient">
+                <param name="ios-package" value="CDVHTTPClient" />
+            </feature>
+        </config-file>
+        <!-- Add in the plugin .swift files here -->
+        <source-file src="src/ios/CDVHTTPClient.swift" />
+
+        <!-- Add in the swift-support plugin by default -->
+        <dependency id="cordova-plugin-add-swift-support" />
+        <pods-config ios-min-version="11.0" use-frameworks="true" />
+        <pod name="Alamofire" spec="〜> 5.0.0-rc.3" />
+    </platform>
+</plugin>

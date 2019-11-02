@@ -1,0 +1,23 @@
+{
+  "name": "cordova-plugin-http",
+  "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/boboxiaodd/cordova-plugin-http"
+  },
+  "description": "Use Alamofire(Swift) for ios",
+  "cordova": {
+    "id": "cordova-plugin-http",
+    "platforms": [
+      "ios"
+    ]
+  },
+  "keywords": [
+    "cordova",
+    "http",
+    "ecosystem:cordova",
+    "cordova-ios"
+  ],
+  "author": "BoBo",
+  "license": "MIT"
+}
