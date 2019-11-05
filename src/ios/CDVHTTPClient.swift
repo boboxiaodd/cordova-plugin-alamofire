@@ -16,9 +16,10 @@ import Alamofire
         let url = arg["url"] as! String
         let param = arg["param"] as? [String:Any]
         let headers = arg["headers"] as? [String:String]
-        Alamofire.request(url, method: .post, parameters: param, headers: headers).responseJSON{res in
+
+        Alamofire.request(url, method: .post, parameters: param ,encoding: JSONEncoding.default , headers: headers).responseJSON{res in
             if res.result.isFailure {
-                let pluginResult = CDVPluginResult (status: CDVCommandStatus_ERROR, messageAs: res.result.debugDescription )
+                let pluginResult = CDVPluginResult (status: CDVCommandStatus_ERROR, messageAs: "BAD JSON")
                 pluginResult?.setKeepCallbackAs(true)
                 self.commandDelegate!.send(pluginResult, callbackId: command.callbackId)
             }else{
@@ -27,6 +28,8 @@ import Alamofire
                 pluginResult?.setKeepCallbackAs(true)
                 self.commandDelegate!.send(pluginResult, callbackId: command.callbackId)
             }
+        }.responseString{ body in
+            print(body)
         }
     }
 
