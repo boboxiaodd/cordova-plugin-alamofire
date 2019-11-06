@@ -7,6 +7,9 @@ var CDVHTTPClient = function() {}; // This just makes it easier for us to export
 CDVHTTPClient.request = function(onSuccess, onError , options) {
     exec(onSuccess, onError, PLUGIN_NAME, "request", [options]);
 };
+CDVHTTPClient.upload = function(onSuccess, onError , options) {
+    exec(onSuccess, onError, PLUGIN_NAME, "upload", [options]);
+};
 CDVHTTPClient.checkcache = function(onSuccess,onError,url){
     exec(onSuccess,onError,PLUGIN_NAME,"checkcache",[url])
 }
