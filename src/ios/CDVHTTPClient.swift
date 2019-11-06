@@ -46,7 +46,7 @@ import Alamofire
             switch result {
                case .success(let upload, _, _):
                    upload.uploadProgress(closure: { (progress) in
-                        let json = ["progress": progress] as [AnyHashable:Any]
+                    let json = ["progress": progress.fractionCompleted] as [AnyHashable:Any]
                         let pluginResult = CDVPluginResult (status: CDVCommandStatus_OK, messageAs: json)
                         pluginResult?.setKeepCallbackAs(true)
                         self.commandDelegate!.send(pluginResult, callbackId: command.callbackId)
@@ -91,13 +91,13 @@ import Alamofire
             //如果存在返回local url
             print("cache exists")
             let localPath = filecache.localURLFromRemoteURL(url)
-            let pluginResult = CDVPluginResult (status: CDVCommandStatus_OK, messageAs: localPath.absoluteString)
+            let pluginResult = CDVPluginResult (status: CDVCommandStatus_OK, messageAs: localPath.lastPathComponent)
             pluginResult?.setKeepCallbackAs(true)
             self.commandDelegate!.send(pluginResult, callbackId: command.callbackId)
         }else{
             print("cache not exists")
             let _ = filecache.downloadFile(url)
-            let pluginResult = CDVPluginResult (status: CDVCommandStatus_OK, messageAs: url.absoluteString)
+            let pluginResult = CDVPluginResult (status: CDVCommandStatus_ERROR, messageAs: url.absoluteString)
             pluginResult?.setKeepCallbackAs(true)
             self.commandDelegate!.send(pluginResult, callbackId: command.callbackId)
         }
