@@ -154,7 +154,7 @@ public class RemoteFileDownloader {
             self.executeOnCompletionBlocks()
         } else {
             let destination:DownloadRequest.DownloadFileDestination = { _, _ in return (self.localURL, []) }
-            
+            print("Download \(self.remoteURL.absoluteString)")
             self.request = Alamofire.download(self.remoteURL.absoluteString, method: .get, to: destination)
                 .downloadProgress {
                     (progress) -> Void in

@@ -62,7 +62,7 @@ public class RemoteFileCacheManager
     public func localURLFromRemoteURL(_ remoteURL:URL) -> URL
     {
         let ext = self.getUrlExt(remoteFileURL: remoteURL)
-        let hash = remoteURL.path.md5
+        let hash = remoteURL.absoluteString.md5
         let filename = "\(hash).\(ext)"
         return fileDirectoryURL.appendingPathComponent(filename)
     }
@@ -204,7 +204,6 @@ public class RemoteFileCacheManager
             downloader.resumeDownload()
             return downloader
         }
-        
         let downloader = RemoteFileDownloader(remoteURL: remoteURL, localURL: self.localURLFromRemoteURL(remoteURL))
         .onCompletion
         {
@@ -232,6 +231,7 @@ public class RemoteFileCacheManager
     public func completeFileExists(remoteFileURL:URL) -> Bool
     {
         let localURL = self.localURLFromRemoteURL(remoteFileURL)
+        print("completeFileExists:\(localURL.path)")
         return FileManager.default.fileExists(atPath: localURL.path)
     }
     

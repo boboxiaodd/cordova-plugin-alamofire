@@ -16,7 +16,7 @@ import Alamofire
         let url = arg["url"] as! String
         let param = arg["param"] as? [String:Any]
         let headers = arg["headers"] as? [String:String]
-
+        
         Alamofire.request(url, method: .post, parameters: param ,encoding: JSONEncoding.default , headers: headers).responseJSON{res in
             if res.result.isFailure {
                 let pluginResult = CDVPluginResult (status: CDVCommandStatus_ERROR, messageAs: "BAD JSON")
