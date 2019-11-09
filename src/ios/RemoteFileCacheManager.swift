@@ -238,8 +238,9 @@ public class RemoteFileCacheManager
     public func getUrlExt(remoteFileURL:URL) -> String
     {
         var ext = remoteFileURL.pathExtension.lowercased()
-        if ext != "jpg" && ext != "png" && ext != "mp3" && ext != "mp4" {
-            ext = String(ext.split(separator: "?")[0])
+
+        print("getUrlExt\(remoteFileURL.absoluteString) ext:\(ext)");
+        if remoteFileURL.query != nil {
             if ext == "mp4" { //video first frame
                 ext = "jpg"
             }
