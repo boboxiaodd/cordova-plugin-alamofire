@@ -12,6 +12,7 @@
         <config-file target="config.xml" parent="/*">
             <feature name="CDVHTTPClient">
                 <param name="ios-package" value="CDVHTTPClient" />
+                <param name="onload" value="true" />
             </feature>
         </config-file>
         <!-- Add in the plugin .swift files here -->
@@ -23,5 +24,6 @@
         <dependency id="cordova-plugin-add-swift-support" />
         <pods-config ios-min-version="11.0" use-frameworks="true" />
         <pod name="Alamofire" version="4.9.1" />
+        <pod name="InAppPurchase" version="2.2.0" />
     </platform>
 </plugin>
