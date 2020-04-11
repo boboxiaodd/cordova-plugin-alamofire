@@ -19,13 +19,9 @@ final class StubPayment: SKPayment {
 
 
 @objc(CDVHTTPClient) class CDVHTTPClient : CDVPlugin {
-    private var filecache:RemoteFileCacheManager!
     override func pluginInitialize() {
-        filecache = RemoteFileCacheManager(subFolder: "cache")
         let iap = InAppPurchase.default
         iap.addTransactionObserver(fallbackHandler: { (result) in
-            // Handle the result of payment added by Store
-            // See also `InAppPurchase#purchase`
             print("addTransactionObserver")
         })
     }
@@ -88,17 +84,24 @@ final class StubPayment: SKPayment {
         let arg = command.arguments[0] as! [String:Any]
         let url = arg["url"] as! String
         let param = arg["param"] as? [String:Any]
-        let headers = arg["headers"] as? [String:String]
+        var headers:HTTPHeaders = HTTPHeaders();
+        for item in arg["headers"] as! [String: String] {
+            headers.add(name: item.key, value: item.value)
+        }
 
-        Alamofire.request(url, method: .post, parameters: param ,encoding: JSONEncoding.default , headers: headers).responseJSON{res in
-            if res.result.isFailure {
-                let respone = String(data: res.data!, encoding: .utf8)
-                let pluginResult = CDVPluginResult (status: CDVCommandStatus_ERROR, messageAs: respone)
+        AF.request(url, method: .post,
+                   parameters: param ,
+                   encoding: JSONEncoding.default ,
+                   headers: headers).responseJSON{res in
+            switch(res.result){
+            case .success(_):
+                let respone = res.value as! [AnyHashable:Any] //String(data: res.data!, encoding: .utf8)
+                let pluginResult = CDVPluginResult (status: CDVCommandStatus_OK, messageAs: respone)
                 pluginResult?.setKeepCallbackAs(true)
                 self.commandDelegate!.send(pluginResult, callbackId: command.callbackId)
-            }else{
-                let json = res.result.value as! [AnyHashable:Any]
-                let pluginResult = CDVPluginResult (status: CDVCommandStatus_OK, messageAs: json)
+            case let .failure(error):
+                let json = ["error": error.errorDescription ?? "nothing"] as [String: Any]
+                let pluginResult = CDVPluginResult (status: CDVCommandStatus_ERROR, messageAs: json)
                 pluginResult?.setKeepCallbackAs(true)
                 self.commandDelegate!.send(pluginResult, callbackId: command.callbackId)
             }
@@ -110,73 +113,24 @@ final class StubPayment: SKPayment {
         let arg = command.arguments[0] as! [String:Any]
         let url = arg["url"] as! String
         let path = arg["path"] as! String
-        let headers = arg["headers"] as? [String:String]
-
-        Alamofire.upload(multipartFormData: {multipartFormData in
-            multipartFormData.append(URL(fileURLWithPath: path), withName: "file")
-        }, to: url, method: .post, headers: headers){result in
-            switch result {
-               case .success(let upload, _, _):
-                   upload.uploadProgress(closure: { (progress) in
-                        let json = ["progress": progress.fractionCompleted] as [AnyHashable:Any]
-                        let pluginResult = CDVPluginResult (status: CDVCommandStatus_OK, messageAs: json)
-                        pluginResult?.setKeepCallbackAs(true)
-                        self.commandDelegate!.send(pluginResult, callbackId: command.callbackId)
-                   })
-                   upload.responseJSON { response in
-                       //print response.result
-                        let json = response.result.value as! [AnyHashable:Any]
-                        let pluginResult = CDVPluginResult (status: CDVCommandStatus_OK, messageAs: json)
-                        pluginResult?.setKeepCallbackAs(true)
-                        self.commandDelegate!.send(pluginResult, callbackId: command.callbackId)
-                   }
-               case .failure(let encodingError):
-                   let pluginResult = CDVPluginResult (status: CDVCommandStatus_ERROR, messageAs: encodingError.localizedDescription)
-                   pluginResult?.setKeepCallbackAs(true)
-                   self.commandDelegate!.send(pluginResult, callbackId: command.callbackId)
-            }
+        var headers:HTTPHeaders = HTTPHeaders();
+        for item in arg["headers"] as! [String: String] {
+            headers.add(name: item.key, value: item.value)
         }
 
-    }
+        AF.upload(multipartFormData: { multipartFormData in
+            multipartFormData.append(URL(fileURLWithPath: path), withName: "file")
+        }, to: url,headers: headers)
+            .uploadProgress{ progress in
 
-    @objc(removecache:)
-    func removecache(command:CDVInvokedUrlCommand){
-        filecache.pruneCache()
-        let pluginResult = CDVPluginResult (status: CDVCommandStatus_OK, messageAs: "ok")
-        pluginResult?.setKeepCallbackAs(true)
-        self.commandDelegate!.send(pluginResult, callbackId: command.callbackId)
-    }
-
-    @objc(cachesize:)
-    func cachesize(command:CDVInvokedUrlCommand){
-        let size = filecache.calculateFolderCacheSize()
-        let pluginResult = CDVPluginResult (status: CDVCommandStatus_OK, messageAs: size)
-        pluginResult?.setKeepCallbackAs(true)
-        self.commandDelegate!.send(pluginResult, callbackId: command.callbackId)
-    }
-
-    @objc(checkcache:)
-    func checkcache(command:CDVInvokedUrlCommand){
-        let arg = command.arguments[0] as! String
-        let url = URL(string: arg)!
-        if filecache.completeFileExists(remoteFileURL: url) {
-            //如果存在返回local url
-            print("cache exists")
-            let localPath = filecache.localURLFromRemoteURL(url)
-            let pluginResult = CDVPluginResult (status: CDVCommandStatus_OK, messageAs: localPath.lastPathComponent)
-            pluginResult?.setKeepCallbackAs(true)
-            self.commandDelegate!.send(pluginResult, callbackId: command.callbackId)
-        }else{
-            print("cache not exists")
-            let my_downloader = filecache.downloadFile(url)
-            my_downloader.onCompletion{ downloader in
-                print("DOWNLOAD COMPLETE!\(downloader.localURL.lastPathComponent)")
-                let pluginResult = CDVPluginResult (status: CDVCommandStatus_OK, messageAs: downloader.localURL.lastPathComponent)
+            }
+            .responseJSON{ response in
+                //print response.result
+                let json = String(data: response.data!, encoding: .utf8)
+                let pluginResult = CDVPluginResult (status: CDVCommandStatus_OK, messageAs: json)
                 pluginResult?.setKeepCallbackAs(true)
                 self.commandDelegate!.send(pluginResult, callbackId: command.callbackId)
             }
-
-        }
     }
 }
 
